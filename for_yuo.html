@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Для тебя</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Lora', serif;
+            background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+            position: relative;
+            padding-bottom: 100px;
+        }
+
+        /* Стартовый экран */
+        #startScreen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0f0c29; z-index: 100; display: flex;
+            justify-content: center; align-items: center; flex-direction: column;
+            cursor: pointer; transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        #startScreen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        
+        .start-title {
+            font-family: 'Playfair Display', serif; font-size: 28px; 
+            color: #e0d4ff; margin-bottom: 20px; letter-spacing: 1px;
+        }
+        .start-hint {
+            margin-top: 30px; font-size: 12px; color: #a89cc8; 
+            letter-spacing: 3px; text-transform: uppercase; animation: pulseText 2s infinite;
+        }
+
+        @keyframes pulseText { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+        /* Звёздный фон */
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .star { position: absolute; background: white; border-radius: 50%; animation: twinkle var(--duration) ease-in-out infinite; opacity: var(--opacity); }
+        @keyframes twinkle { 0%, 100% { opacity: var(--opacity); transform: scale(1); } 50% { opacity: 0.2; transform: scale(0.8); } }
+
+        .container { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; padding: 60px 25px 40px; }
+        
+        .intro { text-align: center; margin-bottom: 60px; opacity: 0; animation: fadeInUp 1.5s ease forwards; }
+        .intro h1 { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 400; letter-spacing: 1px; margin-bottom: 15px; color: #e0d4ff; line-height: 1.2; }
+        .intro p { font-size: 14px; color: #a89cc8; font-weight: 300; letter-spacing: 1px; text-transform: uppercase; }
+
+        .message-block {
+            background: rgba(255, 255, 255, 0.07); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 24px; padding: 35px 30px;
+            margin-bottom: 30px; opacity: 0; transform: translateY(40px);
+            transition: all 1s cubic-bezier(0.22, 1, 0.36, 1); box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        .message-block.visible { opacity: 1; transform: translateY(0); }
+
+        .message-text { font-family: 'Lora', serif; font-size: 18px; line-height: 1.8; color: #f5f0ff; font-weight: 400; text-align: justify; }
+        .highlight { color: #ffb7b7; font-style: italic; font-weight: 500; }
+
+        .final-message { text-align: center; margin-top: 50px; padding-bottom: 20px; opacity: 0; transition: opacity 1.5s ease; }
+        .final-message.visible { opacity: 1; }
+        .love-text { font-family: 'Playfair Display', serif; font-size: 42px; color: #ff6b6b; font-style: italic; margin-bottom: 15px; text-shadow: 0 0 30px rgba(255, 107, 107, 0.4); }
+        .heart-icon { font-size: 50px; color: #ff4d4d; animation: heartbeat 1.5s ease-in-out infinite; display: inline-block; filter: drop-shadow(0 0 15px rgba(255, 77, 77, 0.6)); }
+
+        @keyframes heartbeat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.2); } 30% { transform: scale(1); } 45% { transform: scale(1.2); } 60% { transform: scale(1); } }
+
+        .button-wrapper {
+            position: fixed; bottom: 0; left: 0; width: 100%; padding: 20px;
+            background: linear-gradient(to top, rgba(15, 12, 41, 0.95), transparent);
+            display: flex; justify-content: center; z-index: 10; transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .next-btn {
+            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: #fff;
+            padding: 16px 45px; border-radius: 50px; font-family: 'Lora', serif; font-size: 15px;
+            letter-spacing: 2px; cursor: pointer; transition: all 0.4s ease; text-transform: uppercase;
+            backdrop-filter: blur(5px); box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+        .next-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: #fff; transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4); }
+        .next-btn.hidden { opacity: 0; pointer-events: none; transform: translateY(20px); }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 480px) {
+            .container { padding: 40px 20px 40px; }
+            .intro h1 { font-size: 30px; }
+            .message-text { font-size: 16px; text-align: left; }
+            .love-text { font-size: 36px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Стартовый экран -->
+    <div id="startScreen">
+        <div class="start-title">Для тебя...</div>
+        <div style="font-size: 60px; animation: heartbeat 1.5s infinite;">❤️</div>
+        <div class="start-hint">Нажми, чтобы открыть</div>
+    </div>
+
+    <div class="stars" id="stars"></div>
+    
+    <div class="container">
+        <div class="intro">
+            <h1>Мне нужно тебе сказать...</h1>
+            <p>нажми на кнопку ниже</p>
+        </div>
+        
+        <div class="message-block" id="block1"><p class="message-text">Прости меня за то, что я периодически тебя не понимаю, заставляю переживать или чувствовать себя ещё хуже. Я правда иногда просто не знаю, что сказать. Хочется поддержать, но понимаешь, что слова выходят не те — не такие, какие тебе нужны сейчас.</p></div>
+        <div class="message-block" id="block2"><p class="message-text">Я привык поддерживать только пацанов, и это совсем другой формат. Но я действительно стараюсь понять тебя, прочувствовать твои моменты, чтобы суметь помочь. Всё это накапливается, превращается в большое <span class="highlight">«нет»</span>, которое давит тебе на сердце и душу. И в итоге я становлюсь тем, кто сделал тебе больнее. А я не хочу быть человеком, который только травмирует.</p></div>
+        <div class="message-block" id="block3"><p class="message-text">Странно, что я раньше не переживал ничего подобного. Но это лишь потому, что рядом не было тех людей, с кем можно было бы поделиться проблемами, и тех, кто мог бы поделиться ими со мной. То, что мы переживаем вместе сейчас, мне правда сложно, но я <span class="highlight">не хочу сдаваться</span>. Хочу идти дальше вместе с тобой.</p></div>
+        <div class="message-block" id="block4"><p class="message-text">Может, все эти длинные тексты не совсем уместны, потому что действиями у меня пока не получается всё показать. Но я дорожу тобой и хочу, чтобы ты чувствовала мои старания делать всё как можно лучше. Рядом с тобой я хочу быть <span class="highlight">опорой</span>, человеком, с которым ты хочешь жить, строить счастливое будущее.</p></div>
+        <div class="message-block" id="block5"><p class="message-text">Прости меня ещё раз за всё. Очень хочу быть тем, кто тебе нужен рядом.</p></div>
+        
+        <div class="final-message" id="final">
+            <div class="love-text">Люблю тебя</div>
+            <div class="heart-icon">❤️</div>
+        </div>
+    </div>
+
+    <div class="button-wrapper">
+        <button class="next-btn" id="nextBtn" onclick="showNext()">Читать дальше</button>
+    </div>
+
+    <!-- МУЗЫКА: Файл должен лежать рядом с index.html -->
+    <audio id="bgMusic" loop preload="auto">
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        let currentBlock = 0;
+        const blocks = document.querySelectorAll('.message-block');
+        const totalBlocks = blocks.length;
+        const nextBtn = document.getElementById('nextBtn');
+        const finalMessage = document.getElementById('final');
+        const bgMusic = document.getElementById('bgMusic');
+        const startScreen = document.getElementById('startScreen');
+        let musicStarted = false;
+
+        // Создаём звёзды
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 80; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = Math.random() * 2 + 1;
+                star.style.width = size + 'px'; star.style.height = size + 'px';
+                star.style.left = Math.random() * 100 + '%'; star.style.top = Math.random() * 100 + '%';
+                star.style.setProperty('--duration', (Math.random() * 4 + 2) + 's');
+                star.style.setProperty('--opacity', Math.random() * 0.6 + 0.2);
+                starsContainer.appendChild(star);
+            }
+        }
+        createStars();
+
+        // Логика стартового экрана и запуска музыки
+        startScreen.addEventListener('click', () => {
+            if (!musicStarted) {
+                bgMusic.volume = 0.4;
+                bgMusic.play().catch(e => console.log("Audio play failed:", e));
+                musicStarted = true;
+            }
+            startScreen.classList.add('hidden');
+            
+            // Показываем первый блок после исчезновения заставки
+            setTimeout(() => {
+                blocks[0].classList.add('visible');
+            }, 800);
+        });
+
+        function showNext() {
+            currentBlock++;
+            if (currentBlock < totalBlocks) {
+                blocks[currentBlock].classList.add('visible');
+                setTimeout(() => {
+                    blocks[currentBlock].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+                
+                if (currentBlock === totalBlocks - 1) {
+                    setTimeout(() => {
+                        nextBtn.classList.add('hidden');
+                        finalMessage.classList.add('visible');
+                        setTimeout(() => {
+                            finalMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }, 500);
+                    }, 800);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
